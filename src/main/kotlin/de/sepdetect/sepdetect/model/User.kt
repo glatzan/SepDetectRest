@@ -7,12 +7,12 @@ import javax.persistence.*
 @Entity
 @Table(name = "user_table")
 @NamedEntityGraphs(*[
-    NamedEntityGraph(name = "graph.patient.organization",
+    NamedEntityGraph(name = "graph.user.organization",
             attributeNodes = [NamedAttributeNode("organization")])])
 class User {
 
     @Id
-    var person_id: Long = 0
+    var personId: Long = 0
 
     var name: String = ""
 

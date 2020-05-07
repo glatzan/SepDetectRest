@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface UserRepository : JpaRepository<User, Long> {
 
-    @EntityGraph(value = "graph.patient.organization")
+    @EntityGraph(value = "graph.user.organization")
     fun findUserByName(name: String): User?
 }
