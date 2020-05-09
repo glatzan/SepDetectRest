@@ -5,6 +5,7 @@ import de.sepdetect.sepdetect.model.Patient
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import java.time.LocalDate
+import java.util.*
 
 interface PatientRepository : JpaRepository<Patient, Long> {
     fun findAllByActive(active: Boolean): List<Patient>
@@ -12,7 +13,7 @@ interface PatientRepository : JpaRepository<Patient, Long> {
     fun findAllByActiveAndOrganizationIn(active: Boolean, organizations: List<Organization>): List<Patient>
 
     @EntityGraph(value = "graph.patient.scores.values")
-    fun findPatientByPersonId(id: Long): Patient
+    fun findPatientByPersonId(id: Long): Optional<Patient>
 
     fun findPatientByPersonLastNameContainingIgnoreCaseAndPersonSurnameContainingIgnoreCase(lastName: String, surname: String): List<Patient>
 
