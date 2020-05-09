@@ -12,7 +12,7 @@ class UserServiceImpl constructor(
         private val userRepository: UserRepository) : UserDetailsService {
 
     override fun loadUserByUsername(userName: String): UserDetails {
-        val user = userRepository.findUserByName(userName) ?: throw UsernameNotFoundException(userName)
+        val user = userRepository.findUserByName(userName).orElseThrow { throw UsernameNotFoundException(userName) }
         return User(userName, user.pw, listOf())
     }
 }

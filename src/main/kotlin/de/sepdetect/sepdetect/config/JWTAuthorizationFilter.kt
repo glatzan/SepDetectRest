@@ -8,7 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import java.io.IOException
-import java.util.ArrayList
+import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -43,11 +43,12 @@ class JWTAuthorizationFilter constructor(
 
             val userName = user.subject ?: return null
 
-            val dbUser = userRepository.findUserByName(userName) ?: return null
+            val dbUser = userRepository.findUserByName(userName)
 
-            return if (dbUser != null) {
-                UsernamePasswordAuthenticationToken(dbUser, null, ArrayList())
-            } else null
+            if (!dbUser.isPresent)
+                return null
+
+            return UsernamePasswordAuthenticationToken(dbUser.get(), null, ArrayList())
         }
         return null
     }

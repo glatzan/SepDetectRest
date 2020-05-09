@@ -1,5 +1,7 @@
 package de.sepdetect.sepdetect.model
 
+import com.fasterxml.jackson.annotation.JsonView
+import de.sepdetect.sepdetect.util.JsonViews
 import javax.persistence.*
 
 @Entity
@@ -9,7 +11,9 @@ class Organization {
     @GeneratedValue(generator = "organization_sequencegenerator")
     @SequenceGenerator(name = "organization_sequencegenerator", sequenceName = "organization_sequence")
     @Column(unique = true, nullable = false)
+    @JsonView(JsonViews.PatientsOnly::class, JsonViews.FullPatient::class, JsonViews.UserView::class)
     var id : Long = 0
 
+    @JsonView(JsonViews.PatientsOnly::class, JsonViews.FullPatient::class, JsonViews.UserView::class)
     var name : String = ""
 }

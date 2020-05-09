@@ -33,24 +33,52 @@ class PatientController constructor(
         return patientRepository.findPatientByPersonId(id)
     }
 
+    @JsonView(JsonViews.FullPatient::class)
     @PostMapping("patient/add")
     fun addPatient(@RequestBody patient: Patient): Patient {
+        patient.personId = 0
+        patient.person.id = 0
+
+        if(patient.organization == null)
+            throw IllegalStateException("Patient needs an associated organization!")
+
+        return patientRepository.save(patient)
+    }
+
+    @JsonView(JsonViews.FullPatient::class)
+    @PutMapping("patient/edit")
+    fun edit(@RequestBody patient: Patient): Patient {
+        if(patient.personId == 0L)
+            throw IllegalStateException("Provide patient id!")
+
+        // setzte person id wenn diese nicht gesetzt wurde
+        if (patient.person.id == 0L) {
+            patient.person.id = patient.personId
+        }
+
+        if(patient.organization == null)
+            throw IllegalStateException("Patient needs an associated organization!")
+
         return patientRepository.save(patient)
     }
 
     @DeleteMapping("patient/delete/{id}")
-    fun deletePatient(@PathVariable id: Long) {
-        return patientRepository.deleteById(id)
+    fun deletePatient(@PathVariable id: Long): String {
+        patientRepository.deleteById(id)
+        return "OK: Patient deleted (id: $id)"
     }
 
     @GetMapping("patient/active/{id}")
-    fun togglePatient(@PathVariable id: Long, @RequestParam("active") active: Optional<Boolean>) {
+    fun togglePatient(@PathVariable id: Long, @RequestParam("active") active: Optional<Boolean>): String {
         if (!active.isPresent)
-            return
+            return "Error"
         patientService.togglePatient(id, active.get())
         // TODO set score to completed
+
+        return "OK: ${if (active.get()) "active" else "inactive"}"
     }
 
+    @JsonView(JsonViews.PatientsOnly::class)
     @GetMapping("patient/search")
     fun searchPatients(@RequestParam("lastname") lastname: Optional<String>, @RequestParam("surname") surname: Optional<String>, @RequestParam("birthday") birthday: Optional<String>, @RequestParam("gender") gender: Optional<Char>): List<Patient> {
         if (!lastname.isPresent && !surname.isPresent && !birthday.isPresent && !gender.isPresent)
