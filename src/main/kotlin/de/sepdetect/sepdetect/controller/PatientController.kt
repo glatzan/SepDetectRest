@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
+import javax.persistence.EntityNotFoundException
 
 
 @CrossOrigin
@@ -30,7 +31,7 @@ class PatientController constructor(
     @JsonView(JsonViews.FullPatient::class)
     @GetMapping("patient/get/{id}")
     fun getPatient(@PathVariable id: Long): Patient {
-        return patientRepository.findPatientByPersonId(id)
+        return patientRepository.findPatientByPersonId(id).orElseThrow { throw EntityNotFoundException("Patient not found!") }
     }
 
     @JsonView(JsonViews.FullPatient::class)

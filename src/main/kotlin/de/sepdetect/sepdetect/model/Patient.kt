@@ -40,7 +40,7 @@ class Patient {
     var organization: Organization? = null
 
     @JsonView(JsonViews.FullPatient::class)
-    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
     @OrderColumn(name = "listOrder")
     var scores: MutableList<Score> = ArrayList<Score>()
 }
