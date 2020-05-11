@@ -6,6 +6,11 @@ import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
+@NamedEntityGraphs(*[
+    NamedEntityGraph(name = "graph.scores.values",
+            attributeNodes = [NamedAttributeNode("values")],
+            subgraphs = [NamedSubgraph(name = "scores.values"])
+])
 class Score {
     @Id
     @GeneratedValue(generator = "score_sequencegenerator")
