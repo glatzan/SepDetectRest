@@ -15,7 +15,7 @@ import javax.persistence.EntityNotFoundException
 @RestController
 class ScoreController constructor(
         private val scoreRepository: ScoreRepository,
-        private val soreValueRepository: ScoreValueRepository,
+        private val scoreValueRepository: ScoreValueRepository,
         private val patientRepository: PatientRepository) {
 
     @JsonView(JsonViews.ScoreList::class)
@@ -24,9 +24,16 @@ class ScoreController constructor(
         return scoreRepository.findAllByPatientPersonIdOrderByListOrder(patientID)
     }
 
+    @GetMapping("score/get/{scoreValueId}")
+    @JsonView(JsonViews.ScoreList::class)
+    fun getScore(@PathVariable scoreValueId: Long): ScoreValue {
+        return scoreValueRepository.findById(scoreValueId).orElseThrow { throw EntityNotFoundException("Score Value not found! ($scoreValueId)") }
+    }
+
+
     @JsonView(JsonViews.ScoreList::class)
     @PostMapping("score/add/{patientID}")
-    fun addScore(@PathVariable patientID: Long, @RequestBody scoreValue: ScoreValue, @RequestParam("newScore") newScore: Optional<Boolean>): Score {
+    fun addScoreValue(@PathVariable patientID: Long, @RequestBody scoreValue: ScoreValue, @RequestParam("newScore") newScore: Optional<Boolean>): Score {
         val patient = patientRepository.findPatientByPersonId(patientID).orElseThrow { throw EntityNotFoundException("Patient not found!") }
 
         var score: Score? = null
@@ -41,8 +48,14 @@ class ScoreController constructor(
         }
 
         scoreValue.score = score
-        score.values.add(soreValueRepository.save(scoreValue))
+        score.values.add(scoreValueRepository.save(scoreValue))
         return scoreRepository.save(score)
+    }
+
+    @JsonView(JsonViews.ScoreList::class)
+    @PutMapping("score/edit")
+    fun editScoreValue(@RequestBody scoreValue: ScoreValue): ScoreValue {
+        return scoreValueRepository.save(scoreValue);
     }
 
     @DeleteMapping("score/delete/{scoreID}")

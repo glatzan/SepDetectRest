@@ -32,7 +32,7 @@ class SecurityConfig @Autowired constructor(
                 .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(JWTAuthenticationFilter(authenticationManager()))
+                .addFilter(JWTAuthenticationFilter(authenticationManager(),userRepository))
                 .addFilter(JWTAuthorizationFilter(authenticationManager(),userRepository)) // this disables session creation on Spring Security
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }

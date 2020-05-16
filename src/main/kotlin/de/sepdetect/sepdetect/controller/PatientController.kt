@@ -39,6 +39,7 @@ class PatientController constructor(
     fun addPatient(@RequestBody patient: Patient): Patient {
         patient.personId = 0
         patient.person.id = 0
+        patient.active = true
 
         if(patient.organization == null)
             throw IllegalStateException("Patient needs an associated organization!")
