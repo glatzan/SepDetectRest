@@ -52,6 +52,7 @@ class ScoreController constructor(
         return scoreRepository.save(score)
     }
 
+    @DeleteMapping("score/deleteValue/{scoreID}")
     @JsonView(JsonViews.ScoreList::class)
     @PutMapping("score/edit")
     fun editScoreValue(@RequestBody scoreValue: ScoreValue): ScoreValue {
@@ -60,6 +61,21 @@ class ScoreController constructor(
 
     @DeleteMapping("score/delete/{scoreID}")
     fun deleteScore(@PathVariable scoreID: Long) {
+        scoreValueRepository.deleteById(scoreID)
+    }
 
+    @GetMapping("scores/merge}")
+    fun mergeScores(@RequestParam("score1ID") score1ID: Optional<Long>, @RequestParam("score2ID") score2ID: Optional<Long>) {
+        if (!score1ID.isPresent || !score2ID.isPresent)
+            throw IllegalArgumentException("Error: Provide two score ids!")
+
+        val score1 = scoreRepository.findById(score1ID.get()).orElseThrow { throw EntityNotFoundException("Error: Score not found (id: ${score1ID.get()})") }
+        val score2 = scoreRepository.findById(score2ID.get()).orElseThrow { throw EntityNotFoundException("Error: Score not found (id: ${score2ID.get()})") }
+
+        if (score1.listOrder > score2.listOrder) {
+
+        }else{
+
+        }
     }
 }
