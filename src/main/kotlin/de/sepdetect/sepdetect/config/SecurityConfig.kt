@@ -16,6 +16,7 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import java.util.*
 
+
 /**
  * Security Config
  * Beispiel: https://auth0.com/blog/implementing-jwt-authentication-on-spring-boot/
@@ -32,8 +33,8 @@ class SecurityConfig @Autowired constructor(
                 .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(JWTAuthenticationFilter(authenticationManager(),userRepository))
-                .addFilter(JWTAuthorizationFilter(authenticationManager(),userRepository)) // this disables session creation on Spring Security
+                .addFilter(JWTAuthenticationFilter(authenticationManager(), userRepository))
+                .addFilter(JWTAuthorizationFilter(authenticationManager(), userRepository)) // this disables session creation on Spring Security
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
 

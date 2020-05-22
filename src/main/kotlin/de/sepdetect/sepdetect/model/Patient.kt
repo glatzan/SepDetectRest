@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonView
 import de.sepdetect.sepdetect.util.JsonViews
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
 import org.hibernate.loader.JoinWalker
 import javax.persistence.*
 
@@ -36,11 +38,11 @@ class Patient {
     var person: Person = Person()
 
     @JsonView(JsonViews.PatientsOnly::class, JsonViews.FullPatient::class)
-    @OneToOne
+    @ManyToOne
     var organization: Organization? = null
 
     @JsonView(JsonViews.FullPatient::class)
-    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
     @OrderColumn(name = "listOrder")
     var scores: MutableList<Score> = ArrayList<Score>()
 }

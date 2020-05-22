@@ -9,6 +9,10 @@ import java.time.format.DateTimeFormatter
 import javax.persistence.*
 
 @Entity
+@NamedEntityGraphs(*[
+    NamedEntityGraph(name = "graph.score",
+            attributeNodes = [NamedAttributeNode("score")])
+])
 class ScoreValue {
 
     @Id
@@ -18,7 +22,7 @@ class ScoreValue {
     @JsonView(JsonViews.FullPatient::class, JsonViews.ScoreList::class)
     var id: Long = 0
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = [])
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     var score: Score = Score()
 
     @JsonView(JsonViews.FullPatient::class, JsonViews.ScoreList::class)

@@ -1,10 +1,14 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/sepdetect
+    url: jdbc:postgresql://localhost:5432/sepdetect2
     username: postgres
     password: postgres
   jpa:
       hibernate:
-        ddl-auto: update
+        ddl-auto: create
+
 server:
   port : 8081
+
+sepdetect:
+  debugdata: true

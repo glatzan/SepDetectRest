@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView
 import de.sepdetect.sepdetect.model.User
 import de.sepdetect.sepdetect.repository.OrganizationRepository
 import de.sepdetect.sepdetect.repository.UserRepository
+import de.sepdetect.sepdetect.util.HttpResponseStatus
 import de.sepdetect.sepdetect.util.JsonViews
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.*
@@ -28,7 +29,7 @@ class UserController constructor(
     @PutMapping("user/edit")
     @JsonView(JsonViews.UserView::class)
     fun editUser(@RequestBody user: User): User {
-        if(user.personId == 0L)
+        if (user.personId == 0L)
             throw IllegalStateException("User patient id!")
 
         // setzte person id wenn diese nicht gesetzt wurde
@@ -55,9 +56,9 @@ class UserController constructor(
 
 
     @DeleteMapping("user/delete/{id}")
-    fun deleteUser(@PathVariable id: Long): String {
+    fun deleteUser(@PathVariable id: Long): HttpResponseStatus {
         userRepository.deleteById(id)
-        return "OK: user deleted (id: $id)"
+        return HttpResponseStatus("OK", "User deleted (id: $id)")
     }
 
     @GetMapping("user/organization/add/{id}")

@@ -10,8 +10,10 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationServiceException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import java.io.IOException
+import java.lang.Error
 import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.ServletException
@@ -34,7 +36,7 @@ class JWTAuthenticationFilter constructor(
      */
     @Throws(AuthenticationServiceException::class)
     override fun attemptAuthentication(req: HttpServletRequest,
-                                       res: HttpServletResponse): Authentication {
+                                       res: HttpServletResponse): Authentication? {
         return try {
             val creds: User = ObjectMapper().readValue(req.inputStream, User::class.java)
             authManager.authenticate(
@@ -43,8 +45,9 @@ class JWTAuthenticationFilter constructor(
                             creds.pw,
                             ArrayList())
             )
-        } catch (e: IOException) {
-            throw IllegalArgumentException("Wrong username or password")
+        } catch (e: AuthenticationException) {
+            unsuccessfulAuthentication(req, res, e)
+            return null
         }
     }
 
@@ -67,4 +70,7 @@ class JWTAuthenticationFilter constructor(
         res.writer.write("{\"expires\" : \"${SecurityConstants.EXPIRATION_TIME}\", \"token\" : \"${SecurityConstants.TOKEN_PREFIX.toString() + token}\", \"user\" : ${Gson().toJson(user.get())}}")
     }
 
+    override fun unsuccessfulAuthentication(request: HttpServletRequest, response: HttpServletResponse, failed: AuthenticationException) {
+        response.writer.write("Fehler: Benutzername oder Passwort stimmen nicht.")
+    }
 }
