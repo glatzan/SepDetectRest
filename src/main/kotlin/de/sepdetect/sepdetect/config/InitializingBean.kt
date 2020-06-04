@@ -4,10 +4,15 @@ import de.sepdetect.sepdetect.model.*
 import de.sepdetect.sepdetect.repository.*
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
+/**
+ * afterPropertiesSet() wird nach dem Programmstart ausgeführt. Es wird überprüft ob der Benutzer
+ * admin angelegt wurde. Existiert dieser nicht, wird er angelegt.
+ */
 @Component
 class InitializingBean constructor(
         private val personRepository: PersonRepository,
@@ -18,9 +23,15 @@ class InitializingBean constructor(
         private val bCryptPasswordEncoder: BCryptPasswordEncoder,
         private val patientRepository: PatientRepository) : InitializingBean {
 
+    /**
+     * Wenn wahr, werden Dummybenutzer angelegt. Kann in der application.yml gesetzt werden.
+     */
     @Value("\${sepdetect.debugdata}")
     var debugdata: Boolean = false
 
+    /**
+     * Wird nach dem Programmstart ausgeführt. Erstellt den Benutzer Admin, wenn dieser nicht exisitiert.
+     */
     override fun afterPropertiesSet() {
         println("Starting........")
         val user = userRepository.findUserByName("admin")
@@ -30,16 +41,20 @@ class InitializingBean constructor(
             println("Name: admin")
             println("password admin")
 
+            // erstelle neue Person
             val person = Person()
             person.lastName = "Admin"
             person.surname = "Admin"
             person.gender = 'D'
 
+            // erstelle neuen User Admin
             val newUser = User()
             newUser.name = "admin"
             newUser.pw = bCryptPasswordEncoder.encode("admin")
             newUser.person = person
+            newUser.role = UserRole.ADMIN
 
+            // organisation admin
             var organization = Organization()
             organization.name = "admin"
             organization = organizationRepository.save(organization)
@@ -47,6 +62,7 @@ class InitializingBean constructor(
             newUser.organization.add(organization)
             userRepository.save(newUser)
 
+            // wenn debugdata true, werden zwei Dummybenutzer angelegt
             if (debugdata) {
                 println("")
                 println("Creating dummy Patient: Max Mustermann")
@@ -77,7 +93,7 @@ class InitializingBean constructor(
 
                 p = patientRepository.save(p)
 
-                var score = Score()
+                val score = Score()
                 score.patient = p
                 score.startDate = LocalDate.now()
                 p.scores.add(score)

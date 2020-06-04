@@ -12,20 +12,35 @@ import javax.persistence.PersistenceContext
 import javax.persistence.criteria.*
 import javax.persistence.metamodel.SingularAttribute
 
+/**
+ * Implementation zu @see PatientRepositoryCustom.
+ */
 @Service
 class PatientRepositoryImpl : PatientRepositoryCustom {
 
+    /**
+     * Aktueller EntityManager
+     */
     @PersistenceContext
     private lateinit var em: EntityManager
 
+    /**
+     * Gibt die aktuelle DB Session zurück
+     */
     private fun getSession(): Session {
         return em.unwrap(Session::class.java)
     }
 
+    /**
+     * Gibt den CriteriaBuilder der Session zurück
+     */
     private fun getCriteriaBuilder(): CriteriaBuilder? {
         return getSession().criteriaBuilder
     }
 
+    /**
+     * Findet einen Patienten mittel der übergebenen Argumente. Wird null übergeben, wird das Argument ignoriert.
+     */
     override fun findPatientByArguments(lastname: String?, surname: String?, birthday: LocalDate?, gender: Char?): List<Patient> {
         val builder = getCriteriaBuilder()
         val criteria: CriteriaQuery<Patient> = builder!!.createQuery(Patient::class.java)

@@ -2,6 +2,7 @@ package de.sepdetect.sepdetect.config
 
 import de.sepdetect.sepdetect.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -27,22 +28,34 @@ class SecurityConfig @Autowired constructor(
         private val userRepository: UserRepository,
         private val userDetailsService: UserDetailsService) : WebSecurityConfigurerAdapter() {
 
+    var securitySettings: SecuritySettings = SecuritySettings()
+
+    /**
+     * Setzte HTTP Rechte
+     */
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.cors().and().csrf().disable().authorizeRequests()
-                .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(JWTAuthenticationFilter(authenticationManager(), userRepository))
-                .addFilter(JWTAuthorizationFilter(authenticationManager(), userRepository)) // this disables session creation on Spring Security
+                .addFilter(JWTAuthenticationFilter(securitySettings, authenticationManager(), userRepository))
+                .addFilter(JWTAuthorizationFilter(securitySettings, authenticationManager(), userRepository)) // this disables session creation on Spring Security
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+        println(securitySettings.expiration_time)
     }
 
+    /**
+     * Setzte UserDetailsService
+     */
     @Throws(Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder)
     }
 
+    /**
+     * Setzte Cors
+     */
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()

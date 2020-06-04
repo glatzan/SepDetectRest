@@ -4,11 +4,30 @@ spring:
     username: postgres
     password: postgres
   jpa:
-      hibernate:
-        ddl-auto: create
+    hibernate:
+      ddl-auto: create
+  mail:
+    host: smtp.sepdetect.de
+    port: 465
+    properties:
+      mail:
+        debug: false
+        smtp:
+          starttls.enable: true
+          ssl.trust: smtp.sepdetect.de
+          auth: false
+    protocol: smtps
 
 server:
-  port : 8081
+  port: 8081
 
 sepdetect:
   debugdata: true
+  secret: SecretKeyToGenJWTs
+  securitySettings:
+    secret: "SecretKeyToGenJWTs"
+    expiration_time: 864000000
+    token_prefix: "Bearer "
+    header_string: "Authorization"
+    sign_in: "/login"
+  adminMail: admin@sepdetect.de

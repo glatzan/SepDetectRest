@@ -6,8 +6,10 @@ import de.sepdetect.sepdetect.model.ScoreValue
 import de.sepdetect.sepdetect.repository.PatientRepository
 import de.sepdetect.sepdetect.repository.ScoreRepository
 import de.sepdetect.sepdetect.repository.ScoreValueRepository
+import de.sepdetect.sepdetect.service.impl.MailService
 import de.sepdetect.sepdetect.util.HttpResponseStatus
 import de.sepdetect.sepdetect.util.JsonViews
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.web.bind.annotation.*
 import java.lang.IllegalStateException
 import java.time.LocalDate
@@ -18,20 +20,23 @@ import javax.persistence.EntityNotFoundException
 class ScoreController constructor(
         private val scoreRepository: ScoreRepository,
         private val scoreValueRepository: ScoreValueRepository,
-        private val patientRepository: PatientRepository) {
+        private val patientRepository: PatientRepository,
+        private val mailService: MailService) {
 
-    @JsonView(JsonViews.ScoreList::class)
-    @GetMapping("scores/{patientID}")
-    fun getScores(@PathVariable patientID: Long): List<Score> {
-        return scoreRepository.findAllByPatientPersonIdOrderByListOrder(patientID)
-    }
-
+    /**
+     * Gibt den Score mit der passenden ID zurück. Aufrufer muss die passenden Rechte haben.
+     * TODO: Rechte Check
+     */
     @JsonView(JsonViews.ScoreList::class)
     @GetMapping("score/value/get/{scoreValueId}")
     fun getScore(@PathVariable scoreValueId: Long): ScoreValue {
         return scoreValueRepository.findById(scoreValueId).orElseThrow { throw EntityNotFoundException("Score Value not found! ($scoreValueId)") }
     }
 
+    /**
+     * Markiert einen Verlauf als beendet. Aufrufer muss die passenden Rechte haben.
+     * TODO: Rechte Check
+     */
     @JsonView(JsonViews.ScoreList::class)
     @GetMapping("score/end/{scoreId}")
     fun endScore(@PathVariable scoreId: Long): Score {
@@ -46,6 +51,9 @@ class ScoreController constructor(
         return scoreRepository.save(score)
     }
 
+    /**
+     * Beendet den letzten SOFA-Verlauf des Patienten. Wenn er schon beendet wurde, wird ein Fehler geschmissen.
+     */
     @JsonView(JsonViews.ScoreList::class)
     @GetMapping("score/end/last/{patientId}")
     fun endLastScore(@PathVariable patientId: Long): Score {
@@ -62,12 +70,17 @@ class ScoreController constructor(
         return score
     }
 
+    /**
+     * Erlaubt das hinzufügen eines neuen Scores zu dem aktuellen Verlauf. Existiert kein Verlauf wird ein neuer erstellt. Aufrufer muss die passenden Rechte haben.
+     * TODO: Rechte Check
+     */
     @JsonView(JsonViews.ScoreList::class)
     @PostMapping("score/value/add/{patientID}")
     fun addScoreValue(@PathVariable patientID: Long, @RequestBody scoreValue: ScoreValue, @RequestParam("newScore") newScore: Optional<Boolean>): ScoreValue {
         val patient = patientRepository.findPatientByPersonId(patientID).orElseThrow { throw EntityNotFoundException("Patient not found!") }
 
         var score: Score? = null
+        // erstellt neuen Verlauf wenn nätig
         if ((newScore.isPresent && newScore.get()) || patient.scores.isEmpty() || patient.scores.last().completed) {
             score = Score()
             score.startDate = LocalDate.now()
@@ -79,9 +92,19 @@ class ScoreController constructor(
 
         scoreValue.score = score
         score.values.add(scoreValueRepository.save(scoreValue))
+
+        // send warning mail to users
+        if (patient.scores.last().values[patient.scores.last().values.size - 1].total - patient.scores.last().values[patient.scores.last().values.size - 2].total >= 2) {
+            mailService.sendWarMailToUsers(patient)
+        }
+
         return patientRepository.save(patient).scores.last().values.last();
     }
 
+    /**
+     * Erlaubt das bearbeiten des Scores mit der passenden ID. Aufrufer muss die passenden Rechte haben.
+     * TODO: Rechte Check
+     */
     @JsonView(JsonViews.ScoreList::class)
     @PutMapping("score/value/edit")
     fun editScoreValue(@RequestBody scoreValue: ScoreValue): ScoreValue {
@@ -98,6 +121,9 @@ class ScoreController constructor(
         return scoreValueRepository.save(dbScoreValue);
     }
 
+    /**
+     * Erlaubt das Löschen eines SOFA-Scores. Aufrufer muss die passenden Rechte haben.
+     */
     @DeleteMapping("score/value/delete/{scoreValueId}")
     fun deleteScore(@PathVariable scoreValueId: Long): HttpResponseStatus {
         val scoreValue = scoreValueRepository.findById(scoreValueId).orElseThrow { throw EntityNotFoundException("Score not found!") }
