@@ -5,24 +5,25 @@ spring:
     password: postgres
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
   mail:
-    host: smtp.sepdetect.de
+    host: antares.powerworxx.de
     port: 465
+    username: mailer-daemon@sepdetect.com
     properties:
       mail:
         debug: false
         smtp:
           starttls.enable: true
-          ssl.trust: smtp.sepdetect.de
+          ssl.trust: antares.powerworxx.de
           auth: false
     protocol: smtps
+    password: 5xFrt!s(r54-FGwRt
 
 server:
   port: 8081
 
 sepdetect:
-  debugdata: true
   secret: SecretKeyToGenJWTs
   securitySettings:
     secret: "SecretKeyToGenJWTs"
@@ -30,4 +31,7 @@ sepdetect:
     token_prefix: "Bearer "
     header_string: "Authorization"
     sign_in: "/login"
-  adminMail: admin@sepdetect.de
+  default:
+    debugdata: false
+    adminMails:
+      - glatzan@gmail.com

@@ -1,6 +1,8 @@
 package de.sepdetect.sepdetect.service.impl
 
+import com.sun.xml.fastinfoset.util.StringArray
 import de.sepdetect.sepdetect.model.Patient
+import de.sepdetect.sepdetect.model.User
 import de.sepdetect.sepdetect.repository.OrganizationRepository
 import de.sepdetect.sepdetect.repository.UserRepository
 import org.springframework.mail.SimpleMailMessage
@@ -39,6 +41,19 @@ class MailService constructor(
 
         users.forEach {
             sendMail(it.email, subject, mail)
+        }
+    }
+
+    /**
+     * Sendet das UserPasswort an eine List von Emails
+     */
+    fun sendPasswordToUser(user: User, pw: String, mails: List<String>) {
+
+        val subject = "Neues Passwort für Sepdetec"
+        val mail = "Das Passwort für den Account ${user.name} wurde auf $pw geändert"
+
+        mails.forEach {
+            sendMail(it, subject, mail)
         }
     }
 }

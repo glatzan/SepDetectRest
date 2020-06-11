@@ -2,9 +2,12 @@ package de.sepdetect.sepdetect.config
 
 import de.sepdetect.sepdetect.model.*
 import de.sepdetect.sepdetect.repository.*
+import de.sepdetect.sepdetect.service.impl.MailService
+import de.sepdetect.sepdetect.service.impl.UserService
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -14,8 +17,10 @@ import java.time.LocalDate
  * admin angelegt wurde. Existiert dieser nicht, wird er angelegt.
  */
 @Component
+@ConfigurationProperties(prefix = "sepdetect.default")
 class InitializingBean constructor(
         private val personRepository: PersonRepository,
+        private val mailService: MailService,
         private val scoreValueRepository: ScoreValueRepository,
         private val scoreRepository: ScoreRepository,
         private val userRepository: UserRepository,
@@ -26,8 +31,9 @@ class InitializingBean constructor(
     /**
      * Wenn wahr, werden Dummybenutzer angelegt. Kann in der application.yml gesetzt werden.
      */
-    @Value("\${sepdetect.debugdata}")
     var debugdata: Boolean = false
+
+    var adminMails = mutableListOf<String>()
 
     /**
      * Wird nach dem Programmstart ausgeführt. Erstellt den Benutzer Admin, wenn dieser nicht exisitiert.
@@ -35,11 +41,12 @@ class InitializingBean constructor(
     override fun afterPropertiesSet() {
         println("Starting........")
         val user = userRepository.findUserByName("admin")
-        if (user.isEmpty) {
+        if (!user.isPresent) {
+            val pw = UserService.generateSecureRandomPassword(15)
             println("################# First start #################")
             println("Creating user:")
             println("Name: admin")
-            println("password admin")
+            println("password $pw")
 
             // erstelle neue Person
             val person = Person()
@@ -50,7 +57,7 @@ class InitializingBean constructor(
             // erstelle neuen User Admin
             val newUser = User()
             newUser.name = "admin"
-            newUser.pw = bCryptPasswordEncoder.encode("admin")
+            newUser.pw = bCryptPasswordEncoder.encode(pw)
             newUser.person = person
             newUser.role = UserRole.ADMIN
 
@@ -139,6 +146,9 @@ class InitializingBean constructor(
             }
 
             println("###############################################")
+
+            mailService.sendPasswordToUser(newUser, pw, this.adminMails)
         }
+
     }
 }
