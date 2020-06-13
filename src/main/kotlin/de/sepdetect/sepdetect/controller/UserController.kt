@@ -5,6 +5,7 @@ import de.sepdetect.sepdetect.model.User
 import de.sepdetect.sepdetect.model.UserRole
 import de.sepdetect.sepdetect.repository.OrganizationRepository
 import de.sepdetect.sepdetect.repository.UserRepository
+import de.sepdetect.sepdetect.service.impl.MailService
 import de.sepdetect.sepdetect.service.impl.UserService
 import de.sepdetect.sepdetect.util.HttpResponseStatus
 import de.sepdetect.sepdetect.util.JsonViews
@@ -17,9 +18,11 @@ import javax.persistence.EntityNotFoundException
 /**
  * Kontroller stellt Rest-Endpoints für die Manipulation von Benutzern zur Verfügung.
  */
+@CrossOrigin
 @RestController
 class UserController constructor(
         private val userRepository: UserRepository,
+        private val mailService: MailService,
         private val organizationRepository: OrganizationRepository,
         private val bCryptPasswordEncoder: BCryptPasswordEncoder,
         private val userService: UserService) {
@@ -32,9 +35,19 @@ class UserController constructor(
     fun addUser(@RequestBody user: User): User {
         if (userService.getCurrentUser().role != UserRole.ADMIN)
             throw InsufficientAuthenticationException("Not Permitted!")
+
+        if (user.email.isEmpty()) {
+            throw java.lang.IllegalArgumentException("Email is mandatory")
+        }
+
+        val pw = UserService.generateSecureRandomPassword(15)
+
         user.personId = 0
         user.person.id = 0
-        user.pw = bCryptPasswordEncoder.encode(user.pw)
+        user.pw = if (user.pw.isNotEmpty()) bCryptPasswordEncoder.encode(pw) else bCryptPasswordEncoder.encode(user.pw)
+
+        mailService.sendPasswordToUser(user, pw, listOf(user.email))
+
         return userRepository.save(user)
     }
 

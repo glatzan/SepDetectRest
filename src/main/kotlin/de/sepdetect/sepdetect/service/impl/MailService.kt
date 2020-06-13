@@ -49,6 +49,8 @@ class MailService constructor(
      */
     fun sendPasswordToUser(user: User, pw: String, mails: List<String>) {
 
+        println("Sending mail with password to: ${mails.first()}")
+
         val subject = "Neues Passwort für Sepdetec"
         val mail = "Das Passwort für den Account ${user.name} wurde auf $pw geändert"
 

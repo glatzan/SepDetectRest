@@ -2,12 +2,14 @@ package de.sepdetect.sepdetect.model
 
 import com.fasterxml.jackson.annotation.JsonView
 import de.sepdetect.sepdetect.util.JsonViews
+import org.hibernate.envers.Audited
 import javax.persistence.*
 
 /**
  * POGO für eine Organisation
  */
 @Entity
+@Audited
 class Organization {
 
     /**

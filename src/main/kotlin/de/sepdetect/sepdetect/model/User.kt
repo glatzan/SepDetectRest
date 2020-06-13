@@ -3,6 +3,7 @@ package de.sepdetect.sepdetect.model
 import com.fasterxml.jackson.annotation.JsonView
 import de.sepdetect.sepdetect.util.JsonViews
 import org.hibernate.annotations.SelectBeforeUpdate
+import org.hibernate.envers.Audited
 import javax.persistence.*
 
 /**
@@ -13,6 +14,7 @@ import javax.persistence.*
 @NamedEntityGraphs(*[
     NamedEntityGraph(name = "graph.user.organization",
             attributeNodes = [NamedAttributeNode("organization")])])
+@Audited
 class User {
 
     /**

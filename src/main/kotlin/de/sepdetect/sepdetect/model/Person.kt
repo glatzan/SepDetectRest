@@ -2,6 +2,7 @@ package de.sepdetect.sepdetect.model
 
 import com.fasterxml.jackson.annotation.JsonView
 import de.sepdetect.sepdetect.util.JsonViews
+import org.hibernate.envers.Audited
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -9,6 +10,7 @@ import javax.persistence.*
  * POJO für eine Person, wird von Patient und User referenziert.
  */
 @Entity
+@Audited
 class Person {
 
     /**

@@ -3,6 +3,7 @@ package de.sepdetect.sepdetect.model
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonView
 import de.sepdetect.sepdetect.util.JsonViews
+import org.hibernate.envers.Audited
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -16,6 +17,7 @@ import javax.persistence.*
     NamedEntityGraph(name = "graph.score",
             attributeNodes = [NamedAttributeNode("score")])
 ])
+@Audited
 class ScoreValue {
 
     /**
@@ -86,6 +88,7 @@ class ScoreValue {
     /**
      * Order im Vater-Kontainer
      */
+    @Column(insertable = false, updatable = false)
     @JsonView(JsonViews.FullPatient::class, JsonViews.ScoreList::class)
     var listOrder: Int = 0
 }

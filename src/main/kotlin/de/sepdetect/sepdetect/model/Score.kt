@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView
 import de.sepdetect.sepdetect.util.JsonViews
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
+import org.hibernate.envers.Audited
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -15,6 +16,7 @@ import javax.persistence.*
     NamedEntityGraph(name = "graph.scores.values",
             attributeNodes = [NamedAttributeNode("values")])
 ])
+@Audited
 class Score {
 
     /**
@@ -56,6 +58,7 @@ class Score {
      * Order im Parent-Objekt
      */
     @JsonView(JsonViews.FullPatient::class, JsonViews.ScoreList::class)
+    @Column(insertable = false, updatable = false)
     var listOrder: Int = 0
 
     /**

@@ -24,7 +24,6 @@ server:
   port: 8081
 
 sepdetect:
-  secret: SecretKeyToGenJWTs
   securitySettings:
     secret: "SecretKeyToGenJWTs"
     expiration_time: 864000000
@@ -32,6 +31,6 @@ sepdetect:
     header_string: "Authorization"
     sign_in: "/login"
   default:
-    debugdata: false
+    debugdata: true
     adminMails:
       - glatzan@gmail.com

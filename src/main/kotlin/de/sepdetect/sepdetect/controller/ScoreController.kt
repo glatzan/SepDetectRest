@@ -16,6 +16,7 @@ import java.time.LocalDate
 import java.util.*
 import javax.persistence.EntityNotFoundException
 
+@CrossOrigin
 @RestController
 class ScoreController constructor(
         private val scoreRepository: ScoreRepository,

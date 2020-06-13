@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*
 /**
  * Kontroller für Organisationen.
  */
+@CrossOrigin
 @RestController
 class OrganizationController constructor(
         private val organizationRepository: OrganizationRepository,
