@@ -5,7 +5,7 @@ spring:
     password: postgres
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
   mail:
     host: antares.powerworxx.de
     port: 465
