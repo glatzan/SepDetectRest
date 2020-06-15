@@ -78,7 +78,7 @@ class ScoreController constructor(
     @JsonView(JsonViews.ScoreList::class)
     @PostMapping("score/value/add/{patientID}")
     fun addScoreValue(@PathVariable patientID: Long, @RequestBody scoreValue: ScoreValue, @RequestParam("newScore") newScore: Optional<Boolean>): ScoreValue {
-        val patient = patientRepository.findPatientByPersonId(patientID).orElseThrow { throw EntityNotFoundException("Patient not found!") }
+        var patient = patientRepository.findPatientByPersonId(patientID).orElseThrow { throw EntityNotFoundException("Patient not found!") }
 
         var score: Score? = null
         // erstellt neuen Verlauf wenn nätig
@@ -94,12 +94,18 @@ class ScoreController constructor(
         scoreValue.score = score
         score.values.add(scoreValueRepository.save(scoreValue))
 
-        // send warning mail to users
-        if (patient.scores.last().values[patient.scores.last().values.size - 1].total - patient.scores.last().values[patient.scores.last().values.size - 2].total >= 2) {
-            mailService.sendWarMailToUsers(patient)
+        patient = patientRepository.save(patient)
+
+        if (patient.scores.last().values.size > 1) {
+            val lastValue = patient.scores.last().values.last()
+            val beforeLastValue = patient.scores.last().values[patient.scores.last().values.size - 2]
+            // send warning mail to users
+            if (lastValue.total - beforeLastValue.total >= 2) {
+                mailService.sendWarMailToUsers(patient)
+            }
         }
 
-        return patientRepository.save(patient).scores.last().values.last();
+        return patient.scores.last().values.last();
     }
 
     /**
