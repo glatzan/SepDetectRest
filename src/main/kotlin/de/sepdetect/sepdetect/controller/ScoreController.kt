@@ -81,7 +81,7 @@ class ScoreController constructor(
         var patient = patientRepository.findPatientByPersonId(patientID).orElseThrow { throw EntityNotFoundException("Patient not found!") }
 
         var score: Score? = null
-        // erstellt neuen Verlauf wenn nätig
+        // erstellt neuen Verlauf wenn nötig
         if ((newScore.isPresent && newScore.get()) || patient.scores.isEmpty() || patient.scores.last().completed) {
             score = Score()
             score.startDate = LocalDate.now()
